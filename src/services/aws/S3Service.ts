@@ -12,9 +12,19 @@ import config from "@src/config";
 import { IAwsS3ClientFactory } from "./AwsS3ClientFactory";
 import { IAwsS3Config } from "@src/config/aws/S3Config";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import fs from "fs";
 
+// *************** this should be done better *************
+import AwsS3Config from "@src/config/aws/S3Config";
+import AwsS3ClientFactory from "./AwsS3ClientFactory";
+const awsS3Config = new AwsS3Config(
+  config.amazonS3.awsBucketRegion,
+  config.amazonS3.awsAccessKeyId,
+  config.amazonS3.awsSercetAccessKey,
+);
+const awsS3ClientFactory = new AwsS3ClientFactory();
 export interface IS3Service {
-  uploadFileToS3(fileName: string, file: any): Promise<PutObjectCommandOutput>;
+  uploadFileToS3(filename: string, file: any): Promise<PutObjectCommandOutput>;
   getFileUrlFromAws(filename: string, expiresTime?: number | null): Promise<string | undefined>;
   deleteFileFromS3(filename: string): Promise<DeleteObjectCommandOutput | undefined>;
 }
@@ -26,17 +36,24 @@ class S3Service implements IS3Service {
     this.s3Client = awsS3ClientFactory.createS3Client(config);
   }
 
-  public async uploadFileToS3(fileName: string, file: any): Promise<PutObjectCommandOutput> {
+  public async uploadFileToS3(filename: string, file: Express.Multer.File): Promise<PutObjectCommandOutput> {
     try {
       const uploadParams = {
         Bucket: config.amazonS3.awsBucketName,
-        Key: fileName,
-        Body: file.buffer,
+        Key: filename,
+        Body: fs.createReadStream(file.path),
         ContentType: file.mimetype,
       };
-      return await this.s3Client.send(new PutObjectCommand(uploadParams));
+      const res = await this.s3Client.send(new PutObjectCommand(uploadParams));
+      // delete file from server
+      fs.unlinkSync(file.path);
+      return res;
     } catch (error) {
       logger.error(`Failed to upload file to S3, Error: ${error}`);
+      // Cleanup local file even on failure
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
       throw error;
     }
   }
@@ -115,4 +132,5 @@ class S3Service implements IS3Service {
   }
 }
 
-export default S3Service;
+const awsS3Service = new S3Service(awsS3ClientFactory, awsS3Config);
+export default awsS3Service;

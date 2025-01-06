@@ -17,6 +17,10 @@ interface IConfig {
     awsSercetAccessKey: string;
     awsBucketRegion: string;
   };
+  database: {
+    uri: string;
+    name: string;
+  };
 }
 
 class Config implements IConfig {
@@ -30,6 +34,11 @@ class Config implements IConfig {
     awsBucketRegion: string;
   };
 
+  public database: {
+    uri: string;
+    name: string;
+  };
+
   constructor() {
     this.application = {
       port: this.getNumber("PORT", 8080),
@@ -40,6 +49,11 @@ class Config implements IConfig {
       awsAccessKeyId: this.getString("AWS_ACCESS_KEY_ID"),
       awsSercetAccessKey: this.getString("AWS_SECRET_ACCESS_KEY"),
       awsBucketRegion: this.getString("AWS_BUCKET_REGION"),
+    };
+
+    this.database = {
+      uri: this.getString("DB_URI"),
+      name: this.getString("DB_NAME"),
     };
   }
 

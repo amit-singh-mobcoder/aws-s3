@@ -1,6 +1,8 @@
 import App from "./app";
 import config from "./config/index";
 import { logger } from "./utils/logging";
+import { DatabaseConfig } from "./config/db/DbConfig";
+import Database from "./database/Database";
 
 process.on("uncaughtException", error => {
   logger.error("Uncaught Exception: ", error);
@@ -13,3 +15,6 @@ process.on("unhandledRejection", (reason: any) => {
 
 const app = new App();
 app.listen(config.application.port);
+const dbConfig = new DatabaseConfig(config.database.uri, config.database.name);
+const db = new Database(dbConfig);
+db.connect();

@@ -1,6 +1,7 @@
 import express from "express";
 import { Server } from "http";
 import { logger } from "./utils/logging";
+import appRoutes from "./routes/index";
 
 class App {
   public app: express.Application;
@@ -21,6 +22,7 @@ class App {
 
   private initializeMiddlewares(): void {
     this.app.use(express.json());
+    this.app.use("/api", appRoutes);
   }
 
   private handleGracefulShutdown(server: Server): void {
