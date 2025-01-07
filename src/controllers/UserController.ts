@@ -43,9 +43,8 @@ export class UserController implements IUserController {
       res.status(200).json({
         success: true,
         message: `User with id: ${id} fetched successfully`,
-        user
-      })
-      
+        user,
+      });
     } catch (error) {
       if (error instanceof Error) {
         res.status(500).json({
@@ -55,5 +54,5 @@ export class UserController implements IUserController {
         });
       }
     }
-  }
+  };
 }
