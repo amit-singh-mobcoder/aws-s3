@@ -6,6 +6,7 @@ import { AwsS3FolderNames } from "@src/constants";
 
 export interface IUserService {
   createUser(data: CreateUserDto): Promise<IUser>;
+  getUserById(id: string): Promise<IUser>
 }
 
 export class UserService implements IUserService {
@@ -29,6 +30,16 @@ export class UserService implements IUserService {
     // upload file to bucket in folder /avatars
     await awsS3Service.uploadFileToS3(key, data.file);
     const user = await this.userRepository.create(data);
+    return user;
+  }
+
+  public async getUserById(id: string): Promise<IUser> {
+    const user = await this.userRepository.findById(id);
+    if(!user) throw new Error(`User with id: ${id} does not exists`);
+
+    //now generate a presigned url get object
+    const avatarUrl = await awsS3Service.getFileUrlFromAws(user?.avatar, 120);
+    user.avatar = avatarUrl;
     return user;
   }
 }

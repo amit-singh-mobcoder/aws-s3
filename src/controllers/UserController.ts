@@ -2,7 +2,8 @@ import { IUserService } from "@src/services/UserService";
 import { Request, Response } from "express";
 
 export interface IUserController {
-  createUser(req: Request, res: Response): any;
+  createUser(req: Request, res: Response): Promise<void>;
+  getProfile(req: Request, res: Response): Promise<void>;
 }
 
 export class UserController implements IUserController {
@@ -12,7 +13,7 @@ export class UserController implements IUserController {
     this.userService = userService;
   }
 
-  createUser = async (req: Request, res: Response) => {
+  createUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const { name, email } = req.body;
       const file = req.file;
@@ -34,4 +35,25 @@ export class UserController implements IUserController {
       }
     }
   };
+
+  getProfile = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      res.status(200).json({
+        success: true,
+        message: `User with id: ${id} fetched successfully`,
+        user
+      })
+      
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({
+          success: false,
+          message: error.message || "Internal server error",
+          error,
+        });
+      }
+    }
+  }
 }

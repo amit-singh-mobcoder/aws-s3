@@ -10,5 +10,6 @@ const userService = new UserService(userRepository);
 const userController = new UserController(userService);
 
 router.route("/").post(upload.single("avatar"), userController.createUser as RequestHandler);
+router.route("/:id").get(userController.getProfile as RequestHandler);
 
 export default router;
