@@ -36,6 +36,8 @@ class App {
 
     process.on("SIGINT", () => shutdown("SIGINT"));
     process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGQUIT", () => shutdown("SIGQUIT"));
+    process.on("SIGHUP", () => shutdown("SIGHUP"));
   }
 }
 

@@ -3,6 +3,6 @@ export enum AwsS3FolderNames {
 }
 
 export enum RedisCachingPrefix {
-  user = 'user',
-  presignedUrl = 'presigned-url'
+  user = "user",
+  presignedUrl = "presigned-url",
 }

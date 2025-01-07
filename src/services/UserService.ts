@@ -3,7 +3,7 @@ import { CreateUserDto } from "@src/dto";
 import { IUser } from "@src/model/UserModel";
 import awsS3Service from "./aws/S3Service";
 import { AwsS3FolderNames, RedisCachingPrefix } from "@src/constants";
-import redisCachingService from './redis/RedisCachingService';
+import redisCachingService from "./redis/RedisCachingService";
 
 export interface IUserService {
   createUser(data: CreateUserDto): Promise<IUser>;
@@ -38,9 +38,9 @@ export class UserService implements IUserService {
     let user;
 
     const cacheUserObj = await redisCachingService.get(`${RedisCachingPrefix.user}:${id}`);
-    if(cacheUserObj){
-      user = JSON.parse(cacheUserObj); 
-    }else {
+    if (cacheUserObj) {
+      user = JSON.parse(cacheUserObj);
+    } else {
       // case when user object not present in cache
       user = await this.userRepository.findById(id);
       if (!user) throw new Error(`User with id: ${id} does not exists`);
@@ -48,11 +48,11 @@ export class UserService implements IUserService {
     }
 
     let avatarPresignedUrl = await redisCachingService.get(`${RedisCachingPrefix.presignedUrl}:${id}`);
-    if(avatarPresignedUrl){
+    if (avatarPresignedUrl) {
       user.avatar = avatarPresignedUrl;
-    }else {
+    } else {
       // case when avatar presigned url not present in cache
-      avatarPresignedUrl = await awsS3Service.getFileUrlFromAws(user.avatar, 300); 
+      avatarPresignedUrl = await awsS3Service.getFileUrlFromAws(user.avatar, 300);
       await redisCachingService.set(`${RedisCachingPrefix.presignedUrl}:${id}`, avatarPresignedUrl, 240); // cache url for 4 min
     }
 
