@@ -26,6 +26,7 @@ const awsS3ClientFactory = new AwsS3ClientFactory();
 export interface IS3Service {
   uploadFileToS3(filename: string, file: any): Promise<PutObjectCommandOutput>;
   getFileUrlFromAws(filename: string, expiresTime?: number | null): Promise<string | undefined>;
+  getPutObjectUrl(filename: string, maxFileSize: number, expiresTime: number): Promise<string>;
   deleteFileFromS3(filename: string): Promise<DeleteObjectCommandOutput | undefined>;
 }
 
@@ -82,6 +83,28 @@ class S3Service implements IS3Service {
         logger.error(`Unexpected error type while generating file URL for "${filename}": ${JSON.stringify(err)}`);
       }
       throw err;
+    }
+  }
+
+  public async getPutObjectUrl(
+    filename: string,
+    maxFileSize: number = 2 * 1024 * 1024,
+    expiresTime: number = 3000,
+  ): Promise<string> {
+    try {
+      const command = new PutObjectCommand({
+        Bucket: config.amazonS3.awsBucketName,
+        Key: filename,
+        Metadata: {
+          "x-amz-meta-max-size": maxFileSize.toString(),
+        },
+      });
+
+      const url = await getSignedUrl(this.s3Client, command, { expiresIn: expiresTime });
+      return url;
+    } catch (error) {
+      logger.error(`Error while generating URL to upload file: ${filename}. Error: ${error}`);
+      throw error;
     }
   }
 
