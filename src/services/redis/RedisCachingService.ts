@@ -69,5 +69,4 @@ export class RedisCachingService implements IRedisCachingService {
   }
 }
 
-
 export default createRedisCachingService();
