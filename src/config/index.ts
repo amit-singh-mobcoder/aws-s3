@@ -21,6 +21,11 @@ interface IConfig {
     uri: string;
     name: string;
   };
+  redis: {
+    host: string;
+    port: number;
+    pass: string;
+  };
 }
 
 class Config implements IConfig {
@@ -39,6 +44,12 @@ class Config implements IConfig {
     name: string;
   };
 
+  public redis: {
+    host: string;
+    port: number;
+    pass: string;
+  };
+
   constructor() {
     this.application = {
       port: this.getNumber("PORT", 8080),
@@ -54,6 +65,12 @@ class Config implements IConfig {
     this.database = {
       uri: this.getString("DB_URI"),
       name: this.getString("DB_NAME"),
+    };
+
+    this.redis = {
+      host: this.getString("REDIS_HOST", "localhost"),
+      port: this.getNumber("REDIS_PORT", 6379),
+      pass: this.getString("REDIS_PASS", ""),
     };
   }
 

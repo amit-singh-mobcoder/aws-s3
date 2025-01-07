@@ -4,7 +4,7 @@ import { CreateUserDto } from "@src/dto";
 export interface IUserRepository {
   findByEmail(email: string): Promise<IUser | null>;
   create(data: CreateUserDto): Promise<IUser>;
-  findById(id: string):Promise<IUser | null>;
+  findById(id: string): Promise<IUser | null>;
 }
 
 export class UserRepository implements IUserRepository {
